@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klimb — Account confirmed</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+         background: #0b0d0c; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .card { width: min(92vw, 420px); background: #141716; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 32px 24px; text-align: center; }
+  .mark { font-weight: 900; letter-spacing: 6px; font-size: 20px; color: #fff; margin-bottom: 20px; }
+  .mark b { color: #39FF14; }
+  .check { width: 64px; height: 64px; border-radius: 32px; margin: 0 auto 16px; background: rgba(57,255,20,0.12); border: 1px solid rgba(57,255,20,0.35);
+           display: flex; align-items: center; justify-content: center; font-size: 30px; color: #39FF14; }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  p { color: rgba(248,250,252,0.72); line-height: 1.5; margin: 0 0 18px; font-size: 15px; }
+  a.btn { display: inline-block; background: #1D9E75; color: #fff; text-decoration: none; font-weight: 700; padding: 14px 26px; border-radius: 999px; font-size: 16px; }
+  .small { font-size: 12px; color: rgba(248,250,252,0.48); margin-top: 18px; }
+  .err { color: #fca5a5; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="mark"><b>K</b>LIMB</div>
+    <div id="ok">
+      <div class="check">✓</div>
+      <h1>Your email is confirmed</h1>
+      <p>Open Klimb on your iPhone and sign in with the email and password you just created. Coach K is waiting.</p>
+      <a class="btn" id="open" href="klimb://auth-confirmed">Open Klimb</a>
+      <div class="small">Reading this on a computer? Just open the Klimb app on your phone — the account is already confirmed.</div>
+    </div>
+    <div id="bad" style="display:none">
+      <div class="check" style="color:#fca5a5;border-color:rgba(252,165,165,0.4);background:rgba(252,165,165,0.1)">!</div>
+      <h1>This link didn't work</h1>
+      <p class="err" id="why"></p>
+      <p>Open Klimb, tap <b>Sign in</b> and choose <b>Resend confirmation</b>, or email <a href="mailto:support@klimbfitness.app" style="color:#39FF14">support@klimbfitness.app</a>.</p>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var h = new URLSearchParams(location.hash.replace(/^#/, ''));
+      var err = q.get('error_description') || h.get('error_description');
+      if (err) {
+        document.getElementById('ok').style.display = 'none';
+        document.getElementById('bad').style.display = 'block';
+        document.getElementById('why').textContent = decodeURIComponent(err.replace(/\+/g, ' '));
+        return;
+      }
+      // PKCE: the one-time code goes to the app, which swaps it for a session
+      // on the phone that signed up. Opening on another device is fine — the
+      // account is already confirmed; they just sign in normally.
+      var code = q.get('code') || h.get('code');
+      var target = 'klimb://auth-confirmed' + (code ? '?code=' + encodeURIComponent(code) : '');
+      document.getElementById('open').setAttribute('href', target);
+      var mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (mobile) setTimeout(function () { location.href = target; }, 400);
+    })();
+  </script>
+</body>
+</html>
